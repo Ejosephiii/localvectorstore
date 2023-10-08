@@ -1,9 +1,11 @@
 import os 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] 
 from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
+from langchain.chains import RetrievalQA
+from langchain.llms import OpenAI
 
 if __name__ == "__main__":
     print("Hi")
@@ -17,3 +19,8 @@ if __name__ == "__main__":
     embeddings = OpenAIEmbeddings()
     vectorstore = FAISS.from_documents(docs, embeddings)
     vectorstore.save_local("faiss_index_react")
+
+    new_vectorstore = FAISS.load_local("faiss_index_react", embeddings)
+    qa = RetrievalQA.from_chain_type(llm=OpenAI(), chain_type="stuff", retriever = new_vectorstore.as_retriever())
+    res = qa.run("Give me the gist of ReAct in 3 sentences")
+    print(res)
